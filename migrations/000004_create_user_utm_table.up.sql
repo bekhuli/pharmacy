@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS user_utm (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    utm_id UUID NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_utm FOREIGN KEY (utm_id) REFERENCES utm_sources(id) ON DELETE CASCADE
+);

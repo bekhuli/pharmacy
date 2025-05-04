@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS medicine_illness_links;

@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS orders (
+    ID UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    total_price DECIMAL(12, 2) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+)
