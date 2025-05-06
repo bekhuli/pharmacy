@@ -10,6 +10,7 @@ import (
 
 var DBEnv = initDBConfig()
 var JWTEnv = initJWTConfig()
+var ServerEnv = initServerConfig()
 
 type DBConfig struct {
 	PublicHost string
@@ -23,6 +24,11 @@ type DBConfig struct {
 type JWTConfig struct {
 	JWTSecret     string
 	JWTExpiration int64
+}
+
+type ServerConfig struct {
+	Host string
+	Port string
 }
 
 func initDBConfig() DBConfig {
@@ -44,6 +50,13 @@ func initJWTConfig() JWTConfig {
 	return JWTConfig{
 		JWTSecret:     getEnv("JWT_SECRET", "secret_jwt_key"),
 		JWTExpiration: getEnvAsInt("JWT_EXP", 3600*24),
+	}
+}
+
+func initServerConfig() ServerConfig {
+	return ServerConfig{
+		Host: getEnv("SERVER_HOST", "127.0.0.1"),
+		Port: getEnv("SERVER_PORT", "8080"),
 	}
 }
 
