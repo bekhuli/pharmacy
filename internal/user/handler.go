@@ -24,6 +24,7 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	user, err := h.service.RegisterUser(r.Context(), dto)
 	if err != nil {
 		utils.WriteError(w, http.StatusConflict, err)
+		return
 	}
 
 	utils.WriteJSON(w, http.StatusOK, ToResponse(user))
