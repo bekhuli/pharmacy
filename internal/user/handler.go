@@ -3,6 +3,8 @@ package user
 import (
 	"net/http"
 
+	"github.com/bekhuli/pharmacy/internal/common"
+	"github.com/bekhuli/pharmacy/pkg/auth"
 	"github.com/bekhuli/pharmacy/pkg/utils"
 )
 
@@ -28,4 +30,26 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, ToResponse(user))
+}
+
+func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	var dto LoginRequest
+	if err := utils.BindJSON(r, &dto); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	user, err := h.service.LoginUser(r.Context(), dto)
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	token, err := auth.GenerateJWT(common.JWTEnv, user.ID, user.Phone)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
 }

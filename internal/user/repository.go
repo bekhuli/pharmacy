@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/lib/pq"
@@ -10,6 +11,7 @@ import (
 
 type Repository interface {
 	CreateUser(ctx context.Context, user *User) (*User, error)
+	GetUserByPhone(ctx context.Context, phone string) (*User, error)
 }
 
 type SQLRepository struct {
@@ -46,6 +48,34 @@ func (r *SQLRepository) CreateUser(ctx context.Context, user *User) (*User, erro
 	}
 
 	return user, nil
+}
+
+func (r *SQLRepository) GetUserByPhone(ctx context.Context, phone string) (*User, error) {
+	const query = `
+		SELECT id, phone, first_name, last_name, password, created_at
+		FROM users
+		WHERE phone = $1
+	`
+
+	var user User
+	err := r.db.QueryRowContext(ctx, query, phone).Scan(
+		&user.ID,
+		&user.Phone,
+		&user.FirstName,
+		&user.LastName,
+		&user.Password,
+		&user.CreatedAt,
+	)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrInvalidCredentials
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("get user by username: %w", err)
+	}
+
+	return &user, nil
 }
 
 func isDuplicateError(err error) bool {

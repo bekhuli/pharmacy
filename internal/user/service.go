@@ -33,3 +33,22 @@ func (s *Service) RegisterUser(ctx context.Context, dto RegisterRequest) (*User,
 
 	return s.repo.CreateUser(ctx, user)
 }
+
+func (s *Service) LoginUser(ctx context.Context, dto LoginRequest) (*User, error) {
+	if err := s.validator.Validate(dto); err != nil {
+		return nil, err
+	}
+
+	user, err := s.repo.GetUserByPhone(ctx, dto.Phone)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(dto.Password))
+	if err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	return user, nil
+}

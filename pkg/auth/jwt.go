@@ -43,3 +43,28 @@ func ParseJWT(tokenString string, cfg common.JWTConfig) (*CustomClaims, error) {
 
 	return claims, nil
 }
+
+func GenerateJWT(cfg common.JWTConfig, userID uuid.UUID, phone string) (string, error) {
+	now := time.Now()
+	expiration := now.Add(time.Duration(cfg.JWTExpiration) * time.Second)
+
+	claims := CustomClaims{
+		UserID: userID,
+		Phone:  phone,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expiration),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			Issuer:    "pharmacy-api",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	signedToken, err := token.SignedString([]byte(cfg.JWTSecret))
+	if err != nil {
+		return "", fmt.Errorf("JWT signing failed: %w", err)
+	}
+
+	return signedToken, nil
+}
