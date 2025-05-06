@@ -3,11 +3,13 @@ package common
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
 
-var DBEnv = initConfig()
+var DBEnv = initDBConfig()
+var JWTEnv = initJWTConfig()
 
 type DBConfig struct {
 	PublicHost string
@@ -18,7 +20,12 @@ type DBConfig struct {
 	SSLMode    string
 }
 
-func initConfig() DBConfig {
+type JWTConfig struct {
+	JWTSecret     string
+	JWTExpiration int64
+}
+
+func initDBConfig() DBConfig {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using default database configuration")
 	}
@@ -33,9 +40,29 @@ func initConfig() DBConfig {
 	}
 }
 
+func initJWTConfig() JWTConfig {
+	return JWTConfig{
+		JWTSecret:     getEnv("JWT_SECRET", "secret_jwt_key"),
+		JWTExpiration: getEnvAsInt("JWT_EXP", 3600*24),
+	}
+}
+
 func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
+	}
+
+	return fallback
+}
+
+func getEnvAsInt(key string, fallback int64) int64 {
+	if value, ok := os.LookupEnv(key); ok {
+		i, err := strconv.ParseInt(value, 10, 2)
+		if err != nil {
+			return fallback
+		}
+
+		return i
 	}
 
 	return fallback
