@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/bekhuli/pharmacy/internal/common"
 	"github.com/bekhuli/pharmacy/pkg/utils"
 
-	"github.com/bekhuli/pharmacy/internal/common"
+	"github.com/google/uuid"
 )
 
 type ContextKey string
@@ -19,7 +20,7 @@ const UserKey ContextKey = "userID"
 func JWTMiddleware(cfg common.JWTConfig) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := w.Header().Get("Authorization")
+			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
 				utils.WriteError(w, http.StatusUnauthorized, errors.New("authorization header required"))
 				return
@@ -28,6 +29,7 @@ func JWTMiddleware(cfg common.JWTConfig) func(handler http.Handler) http.Handler
 			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 			if tokenString == "" {
 				utils.WriteError(w, http.StatusUnauthorized, errors.New("bearer token required"))
+				return
 			}
 
 			claims, err := ParseJWT(tokenString, cfg)
@@ -40,4 +42,9 @@ func JWTMiddleware(cfg common.JWTConfig) func(handler http.Handler) http.Handler
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+func GetUserIDFromContext(ctx context.Context) (uuid.UUID, bool) {
+	userID, ok := ctx.Value(UserKey).(uuid.UUID)
+	return userID, ok
 }

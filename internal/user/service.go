@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -18,7 +19,7 @@ func NewUserService(repo Repository, validator *Validator) *Service {
 
 func (s *Service) RegisterUser(ctx context.Context, dto RegisterRequest) (*User, error) {
 	if err := s.validator.Validate(dto); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(dto.Password), bcrypt.DefaultCost)
@@ -40,7 +41,6 @@ func (s *Service) LoginUser(ctx context.Context, dto LoginRequest) (*User, error
 	}
 
 	user, err := s.repo.GetUserByPhone(ctx, dto.Phone)
-
 	if err != nil {
 		return nil, err
 	}
@@ -51,4 +51,8 @@ func (s *Service) LoginUser(ctx context.Context, dto LoginRequest) (*User, error
 	}
 
 	return user, nil
+}
+
+func (s *Service) GetUseByID(ctx context.Context, userID string) (*User, error) {
+	return s.repo.GetUserByID(ctx, userID)
 }

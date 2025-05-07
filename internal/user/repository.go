@@ -12,6 +12,7 @@ import (
 type Repository interface {
 	CreateUser(ctx context.Context, user *User) (*User, error)
 	GetUserByPhone(ctx context.Context, phone string) (*User, error)
+	GetUserByID(ctx context.Context, id string) (*User, error)
 }
 
 type SQLRepository struct {
@@ -24,8 +25,8 @@ func NewUserRepository(db *sql.DB) *SQLRepository {
 
 func (r *SQLRepository) CreateUser(ctx context.Context, user *User) (*User, error) {
 	const query = `
-		INSERT INTO users (id, phone, first_name, last_name, password)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO users (id, phone, first_name, last_name, password, is_deleted)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING created_at
 	`
 
@@ -37,6 +38,7 @@ func (r *SQLRepository) CreateUser(ctx context.Context, user *User) (*User, erro
 		user.FirstName,
 		user.LastName,
 		user.Password,
+		user.IsDeleted,
 	).Scan(&user.CreatedAt)
 
 	if err != nil {
@@ -72,7 +74,32 @@ func (r *SQLRepository) GetUserByPhone(ctx context.Context, phone string) (*User
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("get user by username: %w", err)
+		return nil, fmt.Errorf("get user by phone: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (r *SQLRepository) GetUserByID(ctx context.Context, id string) (*User, error) {
+	const query = `
+		SELECT phone, first_name, last_name
+		FROM users
+		WHERE id = $1
+	`
+
+	var user User
+	err := r.db.QueryRowContext(ctx, query, id).Scan(
+		&user.Phone,
+		&user.FirstName,
+		&user.LastName,
+	)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrInvalidCredentials
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("get user by id: %w", err)
 	}
 
 	return &user, nil
