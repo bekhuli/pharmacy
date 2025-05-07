@@ -5,11 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-
-	"github.com/go-playground/validator/v10"
 )
-
-var validate = validator.New()
 
 func WriteJSON(w http.ResponseWriter, status int, v any) error {
 	w.Header().Add("Content-Type", "application/json")
@@ -31,10 +27,6 @@ func BindJSON(r *http.Request, dst any) error {
 
 	if err := json.NewDecoder(r.Body).Decode(dst); err != nil {
 		return fmt.Errorf("invalid json body: %w", err)
-	}
-
-	if err := validate.Struct(dst); err != nil {
-		return fmt.Errorf("validation failed: %w", err)
 	}
 
 	return nil
