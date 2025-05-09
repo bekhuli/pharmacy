@@ -12,7 +12,7 @@ import (
 type Repository interface {
 	CreateUser(ctx context.Context, user *User) (*User, error)
 	GetUserByPhone(ctx context.Context, phone string) (*User, error)
-	GetUserByID(ctx context.Context, id string) (*User, error)
+	GetUserByID(ctx context.Context, id string) (*Profile, error)
 }
 
 type SQLRepository struct {
@@ -49,6 +49,21 @@ func (r *SQLRepository) CreateUser(ctx context.Context, user *User) (*User, erro
 		return nil, fmt.Errorf("user repository create: %w", err)
 	}
 
+	const criteriaQuery = `
+		INSERT INTO user_criteria (user_id)
+		VALUES ($1)
+	`
+
+	_, err = r.db.ExecContext(
+		ctx,
+		criteriaQuery,
+		user.ID,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("user repository create: %w", err)
+	}
+
 	return user, nil
 }
 
@@ -80,18 +95,18 @@ func (r *SQLRepository) GetUserByPhone(ctx context.Context, phone string) (*User
 	return &user, nil
 }
 
-func (r *SQLRepository) GetUserByID(ctx context.Context, id string) (*User, error) {
+func (r *SQLRepository) GetUserByID(ctx context.Context, id string) (*Profile, error) {
 	const query = `
 		SELECT phone, first_name, last_name
 		FROM users
 		WHERE id = $1
 	`
 
-	var user User
+	var profile Profile
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&user.Phone,
-		&user.FirstName,
-		&user.LastName,
+		&profile.Phone,
+		&profile.FirstName,
+		&profile.LastName,
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -102,7 +117,24 @@ func (r *SQLRepository) GetUserByID(ctx context.Context, id string) (*User, erro
 		return nil, fmt.Errorf("get user by id: %w", err)
 	}
 
-	return &user, nil
+	const critQuery = `
+		SELECT age, job, gender, is_married
+		FROM user_criteria
+		WHERE user_id = $1
+	`
+
+	err = r.db.QueryRowContext(ctx, critQuery, id).Scan(
+		&profile.Age,
+		&profile.Job,
+		&profile.Gender,
+		&profile.IsMarried,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("get user by id: %w", err)
+	}
+
+	return &profile, nil
 }
 
 func isDuplicateError(err error) bool {

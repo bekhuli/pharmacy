@@ -26,6 +26,10 @@ type PublicResponse struct {
 	Phone     string `json:"phone"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+	Age       int64  `json:"age"`
+	Job       string `json:"job"`
+	Gender    string `json:"gender"`
+	IsMarried bool   `json:"is_married"`
 }
 
 func ToResponse(u *User) *Response {
@@ -38,10 +42,14 @@ func ToResponse(u *User) *Response {
 	}
 }
 
-func ToPublicResponse(u *User) *PublicResponse {
+func ToPublicResponse(p *Profile) *PublicResponse {
 	return &PublicResponse{
-		Phone:     u.Phone,
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
+		Phone:     p.Phone,
+		FirstName: p.FirstName,
+		LastName:  p.LastName,
+		Age:       p.Age,
+		Job:       p.Job,
+		Gender:    p.Gender,
+		IsMarried: p.IsMarried,
 	}
 }

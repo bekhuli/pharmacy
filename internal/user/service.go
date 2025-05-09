@@ -53,6 +53,6 @@ func (s *Service) LoginUser(ctx context.Context, dto LoginRequest) (*User, error
 	return user, nil
 }
 
-func (s *Service) GetUseByID(ctx context.Context, userID string) (*User, error) {
+func (s *Service) GetUseByID(ctx context.Context, userID string) (*Profile, error) {
 	return s.repo.GetUserByID(ctx, userID)
 }

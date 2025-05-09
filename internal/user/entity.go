@@ -15,3 +15,13 @@ type User struct {
 	CreatedAt time.Time
 	IsDeleted bool
 }
+
+type Profile struct {
+	Phone     string
+	FirstName string
+	LastName  string
+	Age       int64
+	Job       string
+	Gender    string
+	IsMarried bool
+}
