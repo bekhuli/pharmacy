@@ -164,14 +164,14 @@ func (r *SQLRepository) UpdateUserProfile(ctx context.Context, id string, p *Pro
 
 		if p.LastName != nil {
 			query += fmt.Sprintf(" last_name = $%d,", idx)
-			args = append(args, *p.FirstName)
+			args = append(args, *p.LastName)
 			idx++
 		}
 
 		query = strings.TrimSuffix(query, ",") + fmt.Sprintf(" WHERE id = $%d", idx)
 		args = append(args, id)
 
-		if _, err = r.db.ExecContext(ctx, query, args...); err != nil {
+		if _, err = tx.ExecContext(ctx, query, args...); err != nil {
 			return nil, fmt.Errorf("update users: %w", err)
 		}
 	}
@@ -208,8 +208,8 @@ func (r *SQLRepository) UpdateUserProfile(ctx context.Context, id string, p *Pro
 		query = strings.TrimSuffix(query, ",") + fmt.Sprintf(" WHERE user_id = $%d", idx)
 		args = append(args, id)
 
-		if _, err = r.db.ExecContext(ctx, query, args...); err != nil {
-			return nil, fmt.Errorf("update users: %w", err)
+		if _, err = tx.ExecContext(ctx, query, args...); err != nil {
+			return nil, fmt.Errorf("update user_criteria: %w", err)
 		}
 	}
 
