@@ -17,4 +17,5 @@ func RegisterUserRoutes(r *mux.Router, h *UserHandler) {
 	protected.Use(auth.JWTMiddleware(common.JWTEnv))
 
 	protected.HandleFunc("/profile", h.GetUserByID).Methods("GET")
+	protected.HandleFunc("/profile", h.UpdateUserProfile).Methods("PUT")
 }

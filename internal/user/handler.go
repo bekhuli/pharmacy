@@ -70,3 +70,24 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteJSON(w, http.StatusOK, ToPublicResponse(user))
 }
+
+func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := auth.GetUserIDFromContext(r.Context())
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, errors.New("unauthorized"))
+	}
+
+	var dto UpdateProfileRequest
+	if err := utils.BindJSON(r, &dto); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	updated, err := h.service.UpdateUserProfile(r.Context(), userID.String(), &dto)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, ToPublicResponse(updated))
+}

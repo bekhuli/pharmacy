@@ -56,3 +56,20 @@ func (s *Service) LoginUser(ctx context.Context, dto LoginRequest) (*User, error
 func (s *Service) GetUseByID(ctx context.Context, userID string) (*Profile, error) {
 	return s.repo.GetUserByID(ctx, userID)
 }
+
+func (s *Service) UpdateUserProfile(ctx context.Context, userID string, dto *UpdateProfileRequest) (*Profile, error) {
+	if err := s.validator.Validate(dto); err != nil {
+		return nil, err
+	}
+
+	update := &Profile{
+		FirstName: dto.FirstName,
+		LastName:  dto.LastName,
+		Age:       dto.Age,
+		Job:       dto.Job,
+		Gender:    dto.Gender,
+		IsMarried: dto.IsMarried,
+	}
+
+	return s.repo.UpdateUserProfile(ctx, userID, update)
+}

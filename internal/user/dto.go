@@ -14,6 +14,15 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type UpdateProfileRequest struct {
+	FirstName *string `json:"first_name,omitempty"`
+	LastName  *string `json:"last_name,omitempty"`
+	Age       *int    `json:"age,omitempty"`
+	Job       *string `json:"job,omitempty"`
+	Gender    *string `json:"gender,omitempty"`
+	IsMarried *bool   `json:"is_married,omitempty"`
+}
+
 type Response struct {
 	ID        string    `json:"id"`
 	Phone     string    `json:"phone"`
@@ -23,13 +32,13 @@ type Response struct {
 }
 
 type PublicResponse struct {
-	Phone     string `json:"phone"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Age       int64  `json:"age"`
-	Job       string `json:"job"`
-	Gender    string `json:"gender"`
-	IsMarried bool   `json:"is_married"`
+	Phone     string  `json:"phone"`
+	FirstName *string `json:"first_name"`
+	LastName  *string `json:"last_name"`
+	Age       *int    `json:"age"`
+	Job       *string `json:"job"`
+	Gender    *string `json:"gender"`
+	IsMarried *bool   `json:"is_married"`
 }
 
 func ToResponse(u *User) *Response {
