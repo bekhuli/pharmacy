@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/bekhuli/pharmacy/internal/common"
 	"github.com/golang-migrate/migrate/v4"
@@ -16,7 +17,7 @@ const migrationsDir = "file://migrations"
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("missing command: up | down")
+		log.Fatal("missing command: up | down | force [version]")
 	}
 	command := os.Args[1]
 
@@ -48,7 +49,19 @@ func main() {
 			log.Fatalf("migration down failed: %v", err)
 		}
 		log.Println("all migrations reverted successfully")
+	case "force":
+		if len(os.Args) < 3 {
+			log.Fatal("missing version for force command")
+		}
+		version, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			log.Fatalf("invalid version number: %v", err)
+		}
+		if err := m.Force(version); err != nil {
+			log.Fatalf("force command failed: %v", err)
+		}
+		log.Printf("successfully forced version to %d", version)
 	default:
-		log.Fatalf("unknown command: %s (expected: up | down)", command)
+		log.Fatalf("unknown command: %s (expected: up | down | force)", command)
 	}
 }
