@@ -15,7 +15,10 @@ import (
 
 type ContextKey string
 
-const UserKey ContextKey = "userID"
+const (
+	UserKey ContextKey = "userID"
+	RoleKey ContextKey = "role"
+)
 
 func JWTMiddleware(cfg common.JWTConfig) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -39,7 +42,27 @@ func JWTMiddleware(cfg common.JWTConfig) func(handler http.Handler) http.Handler
 			}
 
 			ctx := context.WithValue(r.Context(), UserKey, claims.UserID)
+			ctx = context.WithValue(r.Context(), RoleKey, claims.Role)
 			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func RequireRole(roleReq string) func(handler http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			role, ok := GetRoleFromContext(r.Context())
+			if !ok {
+				utils.WriteError(w, http.StatusForbidden, errors.New("roles missing in context"))
+				return
+			}
+
+			if role == roleReq {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			utils.WriteError(w, http.StatusForbidden, errors.New("insufficient permission"))
 		})
 	}
 }
@@ -47,4 +70,9 @@ func JWTMiddleware(cfg common.JWTConfig) func(handler http.Handler) http.Handler
 func GetUserIDFromContext(ctx context.Context) (uuid.UUID, bool) {
 	userID, ok := ctx.Value(UserKey).(uuid.UUID)
 	return userID, ok
+}
+
+func GetRoleFromContext(ctx context.Context) (string, bool) {
+	role, ok := ctx.Value(RoleKey).(string)
+	return role, ok
 }
