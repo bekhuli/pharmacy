@@ -66,6 +66,25 @@ func (r *SQLRepository) CreateUser(ctx context.Context, user *User) (*User, erro
 		return nil, fmt.Errorf("user repository create: %w", err)
 	}
 
+	const roleIDQuery = `
+		SELECT id
+		FROM roles
+		WHERE name = 'User'
+	`
+
+	var roleID int
+	err = r.db.QueryRowContext(ctx, roleIDQuery).Scan(&roleID)
+	if err != nil {
+		return nil, fmt.Errorf("user repository create: %w", err)
+	}
+
+	const roleQuery = `
+		INSERT INTO user_roles (user_id, role_id)
+		VALUES ($1, $2)
+	`
+
+	_, err = r.db.ExecContext(ctx, roleQuery, user.ID, roleID)
+
 	return user, nil
 }
 
