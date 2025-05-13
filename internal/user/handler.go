@@ -46,7 +46,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := auth.GenerateJWT(common.JWTEnv, user.ID, user.Phone)
+	token, err := auth.GenerateJWT(common.JWTEnv, user.ID, user.Phone, user.Role)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return

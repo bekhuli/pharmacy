@@ -12,6 +12,7 @@ type User struct {
 	FirstName string
 	LastName  string
 	Password  string
+	Role      string
 	CreatedAt time.Time
 	IsDeleted bool
 }

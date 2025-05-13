@@ -89,14 +89,14 @@ func (r *SQLRepository) CreateUser(ctx context.Context, user *User) (*User, erro
 }
 
 func (r *SQLRepository) GetUserByPhone(ctx context.Context, phone string) (*User, error) {
-	const query = `
+	const userQuery = `
 		SELECT id, phone, first_name, last_name, password, created_at
 		FROM users
 		WHERE phone = $1
 	`
 
 	var user User
-	err := r.db.QueryRowContext(ctx, query, phone).Scan(
+	err := r.db.QueryRowContext(ctx, userQuery, phone).Scan(
 		&user.ID,
 		&user.Phone,
 		&user.FirstName,
@@ -109,6 +109,29 @@ func (r *SQLRepository) GetUserByPhone(ctx context.Context, phone string) (*User
 		return nil, ErrInvalidCredentials
 	}
 
+	if err != nil {
+		return nil, fmt.Errorf("get user by phone: %w", err)
+	}
+
+	const roleIDQuery = `
+		SELECT role_id
+		FROM user_roles
+		WHERE user_id = $1
+	`
+
+	var roleID int
+	err = r.db.QueryRowContext(ctx, roleIDQuery, user.ID).Scan(&roleID)
+	if err != nil {
+		return nil, fmt.Errorf("get user by phone: %w", err)
+	}
+
+	const roleQuery = `
+		SELECT name
+		FROM roles
+		WHERE id = $1
+	`
+
+	err = r.db.QueryRowContext(ctx, roleQuery, roleID).Scan(&user.Role)
 	if err != nil {
 		return nil, fmt.Errorf("get user by phone: %w", err)
 	}
