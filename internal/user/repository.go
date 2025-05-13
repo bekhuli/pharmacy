@@ -69,7 +69,7 @@ func (r *SQLRepository) CreateUser(ctx context.Context, user *User) (*User, erro
 	const roleIDQuery = `
 		SELECT id
 		FROM roles
-		WHERE name = 'User'
+		WHERE name = 'user'
 	`
 
 	var roleID int
