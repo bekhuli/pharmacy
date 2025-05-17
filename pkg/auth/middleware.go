@@ -53,7 +53,7 @@ func RequireRole(roleReq string) func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			role, ok := GetRoleFromContext(r.Context())
 			if !ok {
-				utils.WriteError(w, http.StatusForbidden, errors.New("roles missing in context"))
+				utils.WriteError(w, http.StatusForbidden, errors.New("role missing in context"))
 				return
 			}
 
