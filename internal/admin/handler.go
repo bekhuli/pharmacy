@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"github.com/gorilla/mux"
 	"math"
 	"net/http"
 	"strconv"
@@ -38,6 +39,18 @@ func (h *AdminHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, response)
+}
+
+func (h *AdminHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userID := vars["id"]
+
+	user, err := h.service.GetUser(r.Context(), userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, err)
+	}
+
+	utils.WriteJSON(w, http.StatusOK, ToUserResponse(user))
 }
 
 func parsePaginationParams(r *http.Request) (page, limit int) {

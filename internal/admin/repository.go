@@ -8,6 +8,7 @@ import (
 
 type Repository interface {
 	GetAllUsers(ctx context.Context, offset, limit int) ([]*User, int, error)
+	GetUser(ctx context.Context, userID string) (*User, error)
 }
 
 type SQLRepository struct {
@@ -70,4 +71,37 @@ func (r *SQLRepository) GetAllUsers(ctx context.Context, offset, limit int) ([]*
 	}
 
 	return users, total, nil
+}
+
+func (r *SQLRepository) GetUser(ctx context.Context, userID string) (*User, error) {
+	const userQuery = `
+		SELECT id, phone, first_name, last_name, created_at
+		FROM users
+		WHERE id = $1
+	`
+
+	var user User
+	err := r.db.QueryRowContext(ctx, userQuery, userID).Scan(
+		&user.ID,
+		&user.Phone,
+		&user.FirstName,
+		&user.LastName,
+		&user.CreatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error getting user: %w", err)
+	}
+
+	var roleID string
+	err = r.db.QueryRowContext(ctx, `SELECT role_id FROM user_roles WHERE user_id = $1`, userID).Scan(&roleID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting role: %w", err)
+	}
+
+	err = r.db.QueryRowContext(ctx, `SELECT name FROM roles WHERE id = $1`, roleID).Scan(&user.Role)
+	if err != nil {
+		return nil, fmt.Errorf("error getting role: %w", err)
+	}
+
+	return &user, nil
 }

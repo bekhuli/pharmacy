@@ -15,3 +15,7 @@ func (s *Service) GetAllUsers(ctx context.Context, page, limit int) ([]*User, in
 	offset := (page - 1) * limit
 	return s.repo.GetAllUsers(ctx, offset, limit)
 }
+
+func (s *Service) GetUser(ctx context.Context, userID string) (*User, error) {
+	return s.repo.GetUser(ctx, userID)
+}

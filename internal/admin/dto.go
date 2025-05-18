@@ -6,11 +6,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type UsersResponse struct {
+type UserResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Phone     string    `json:"phone"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
+	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -35,13 +36,14 @@ type PaginatedResponseDTO[T any] struct {
 	Meta PaginationMetaDTO
 }
 
-func ToUsersResponse(u *User) *UsersResponse {
-	return &UsersResponse{
+func ToUserResponse(u *User) *UserResponse {
+	return &UserResponse{
 		ID:        u.ID,
 		Phone:     u.Phone,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
 		CreatedAt: u.CreatedAt,
+		Role:      u.Role,
 	}
 }
 

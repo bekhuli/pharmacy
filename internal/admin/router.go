@@ -13,4 +13,5 @@ func RegisterAdminRoutes(r *mux.Router, h *AdminHandler) {
 	protected.Use(auth.RequireRole("admin"))
 
 	protected.HandleFunc("/users", h.GetAllUsers).Methods("GET")
+	protected.HandleFunc("/user/{id}", h.GetUser).Methods("GET")
 }
