@@ -12,4 +12,5 @@ type User struct {
 	FirstName string
 	LastName  string
 	CreatedAt time.Time
+	Role      string
 }

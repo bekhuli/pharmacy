@@ -11,6 +11,7 @@ func NewAdminService(repo Repository, validator *Validator) *Service {
 	return &Service{repo: repo, validator: validator}
 }
 
-func (s *Service) GetAllUsers(ctx context.Context) ([]*User, error) {
-	return s.repo.GetAllUsers(ctx)
+func (s *Service) GetAllUsers(ctx context.Context, page, limit int) ([]*User, int, error) {
+	offset := (page - 1) * limit
+	return s.repo.GetAllUsers(ctx, offset, limit)
 }
